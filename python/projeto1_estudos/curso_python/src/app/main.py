@@ -8,11 +8,12 @@
 # ou
 
 # from pacote.sub import arquivo
-#from tipos import variaveis, basicos
+# from tipos import variaveis, basicos
 # import tipos.lista
 # import tipos.tuplas
 # import tipos.conjuntos
 # import tipos.dicionario
-import operadores.unarios
-#import operadores.binarios
+# import operadores.binarios
+
+import operadores.aritmeticos
 

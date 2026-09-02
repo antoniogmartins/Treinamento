@@ -14,4 +14,6 @@
 # from Codigo import intrucaoif7
 # from Codigo import intrucaoif8
 # from Codigo import funcao1
-from Codigo import funcao2
+# from Codigo import funcao2
+# from Codigo import strings1
+from Codigo import strings2

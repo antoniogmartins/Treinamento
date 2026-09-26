@@ -1,6 +1,7 @@
 package br.com.abc.javacore.modificadorfinal.tests;
 
 import br.com.abc.javacore.modificadorfinal.classes.Carro;
+import br.com.abc.javacore.modificadorfinal.classes.Subaru;
 
 public class CarroTest {
     static void main() {
@@ -11,6 +12,9 @@ public class CarroTest {
         carro.setMarca("MARCA 1");
         carro.setNome("Opala");
         carro.imprime();
+        Subaru sub = new Subaru();
+        sub.imprime();
+        sub.imprime("Testando imprime com string ");
     }
 
     

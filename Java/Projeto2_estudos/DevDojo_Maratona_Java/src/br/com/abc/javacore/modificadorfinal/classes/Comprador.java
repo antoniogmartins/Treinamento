@@ -18,6 +18,4 @@ public class Comprador {
         this.nome = nome;
     }
 
-
-
 }

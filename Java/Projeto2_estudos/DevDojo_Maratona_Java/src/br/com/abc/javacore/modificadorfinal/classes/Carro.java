@@ -33,7 +33,8 @@ public class Carro {
     public Comprador getComprador() {
         return comprador;
     }
-    public final void imprime(){
+
+    public void imprime(){
         System.out.println("Marca: "+ this.getMarca()+" Nome: "+this.getNome() );
     }
 

@@ -2,6 +2,7 @@ package com.ra_ia.api;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.ra_ia.prediario.UsuarioNaoEncontradoException;
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
 
@@ -17,9 +18,9 @@ public class PrimeiroTesteApi {
 
     String baseUrl = "https://jsonplaceholder.typicode.com/";
 
-   // @Test
+    // @Test
     void deveConsultarUsuarios() {
-    Response resposta = RestAssured
+        Response resposta = RestAssured
                 .given()
                 .header("Accept", "application/json")
                 .when()
@@ -42,7 +43,7 @@ public class PrimeiroTesteApi {
 
     }
 
-    @Test
+    //@Test
     void deveEncontrarUsuarioPorEmail() {
 
         Response resposta = RestAssured
@@ -54,7 +55,6 @@ public class PrimeiroTesteApi {
                 .statusCode(200)
                 .extract().response();
 
-//        List<Map<String, Object>> emailnomesDosUsuarios = resposta.jsonPath().getList("");
         List<UserDTO> usuarios = resposta.jsonPath().getList("", UserDTO.class);
 
         String nomeEsperado = "Clementine Bauch";
@@ -65,8 +65,7 @@ public class PrimeiroTesteApi {
                 .filter(cadaUsuario ->
                         emailEsperado.equals(cadaUsuario.getEmail())
                 )
-                .findFirst()
-                ;
+                .findFirst();
 
         UserDTO usuarioEncontrado = resultado.orElseThrow(
                 () -> new UsuarioNaoEncontradoException(
@@ -77,7 +76,32 @@ public class PrimeiroTesteApi {
         assertEquals(nomeEsperado, usuarioEncontrado.getName());
         assertEquals(emailEsperado, usuarioEncontrado.getEmail());
         assertEquals(usernameEsperado, usuarioEncontrado.getUsername());
+    }
 
+    @Test
+    void deveCriarUsuario() {
 
+        UserDTO novoUsuario = new UserDTO(
+                "Antonio Martins",
+                "AntonioQA",
+                "antonio@gmail.com"
+        );
+
+        Response resposta = RestAssured
+                .given()
+                .header("Accept", "application/json")
+                .contentType(ContentType.JSON)
+                .body(novoUsuario)
+                .when()
+                .post(baseUrl + "users")
+                .then()
+                .statusCode(201)
+                .extract()
+                .response();
+
+        UserDTO usuarioCriado = resposta.as(UserDTO.class);
+        assertEquals(novoUsuario.getName(), usuarioCriado.getName());
+        assertEquals(novoUsuario.getUsername(), usuarioCriado.getUsername());
+        assertEquals(novoUsuario.getEmail(), usuarioCriado.getEmail());
     }
 }

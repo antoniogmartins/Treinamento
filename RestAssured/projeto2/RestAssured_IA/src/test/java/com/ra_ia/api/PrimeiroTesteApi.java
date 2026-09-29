@@ -1,24 +1,20 @@
 package com.ra_ia.api;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.ra_ia.dto.createUserRequest;
+import com.ra_ia.dto.updateUserRequest;
 import com.ra_ia.prediario.UsuarioNaoEncontradoException;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
-
-import static io.restassured.RestAssured.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PrimeiroTesteApi {
 
     String baseUrl = "https://jsonplaceholder.typicode.com/";
 
-    // @Test
+   //  @Test
     void deveConsultarUsuarios() {
         Response resposta = RestAssured
                 .given()
@@ -43,7 +39,7 @@ public class PrimeiroTesteApi {
 
     }
 
-    //@Test
+   // @Test
     void deveEncontrarUsuarioPorEmail() {
 
         Response resposta = RestAssured
@@ -78,14 +74,10 @@ public class PrimeiroTesteApi {
         assertEquals(usernameEsperado, usuarioEncontrado.getUsername());
     }
 
-    @Test
+   // @Test
     void deveCriarUsuario() {
 
-        UserDTO novoUsuario = new UserDTO(
-                "Antonio Martins",
-                "AntonioQA",
-                "antonio@gmail.com"
-        );
+        createUserRequest novoUsuario = new createUserRequest();
 
         Response resposta = RestAssured
                 .given()
@@ -96,12 +88,40 @@ public class PrimeiroTesteApi {
                 .post(baseUrl + "users")
                 .then()
                 .statusCode(201)
+                .contentType(ContentType.JSON)
                 .extract()
                 .response();
 
         UserDTO usuarioCriado = resposta.as(UserDTO.class);
+
+        assertEquals(11, usuarioCriado.getId());
         assertEquals(novoUsuario.getName(), usuarioCriado.getName());
         assertEquals(novoUsuario.getUsername(), usuarioCriado.getUsername());
         assertEquals(novoUsuario.getEmail(), usuarioCriado.getEmail());
+    }
+
+    @Test
+    void deveAtualizarUsuario() {
+
+        updateUserRequest atualizarUsuario = new  updateUserRequest();
+
+        Response resposta = RestAssured
+                .given()
+                .header("Accept", "application/json")
+                .contentType(ContentType.JSON)
+                .body(atualizarUsuario)
+                .when()
+                .put(baseUrl + "users/10")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .response();
+
+        UserDTO usuarioAtualizado = resposta.as(UserDTO.class);
+        assertEquals(10, usuarioAtualizado.getId());
+        assertEquals(atualizarUsuario.getName(), usuarioAtualizado.getName());
+        assertEquals(atualizarUsuario.getUsername(), usuarioAtualizado.getUsername());
+        assertEquals(atualizarUsuario.getEmail(), usuarioAtualizado.getEmail());
     }
 }

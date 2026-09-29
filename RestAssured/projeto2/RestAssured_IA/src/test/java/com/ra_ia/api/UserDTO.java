@@ -11,7 +11,6 @@ public class UserDTO {
     private String email;
 
     public UserDTO(String name, String username, String email) {
-        this.id = id;
         this.name = name;
         this.username = username;
         this.email = email;

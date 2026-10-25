@@ -2,7 +2,6 @@ const { test, expect } = require('@playwright/test');
 const { realizarLogin } = require('../../helpers/login');
 const { adicionarProdutosAoCarrinho } = require('../../helpers/produtos');
 
-// 1. Dados dos cenários
 const cenariosLogin = [
     {
         descricao: '01 - Realizar Login com credenciais válidas',
@@ -26,14 +25,8 @@ const produtos = [
 
 const dadosCheckout = {
     nome: 'Antonio',
-    sobrenome: 'Martins',
+    sobreNome: 'Martins',
     codigoPostal: '20010000'
-};
-
-const precoTotal = {
-    item_total: '$45.98',
-    tax: '$3.68',
-    total: '$49.66'
 };
 
 const subtotalEsperado = produtos.reduce((acumulador, item) => {
@@ -43,21 +36,46 @@ const subtotalEsperado = produtos.reduce((acumulador, item) => {
     return total;
 }, 0);
 
+const TAXA_IMPOSTO = 0.08;
+const taxEsperado = subtotalEsperado * TAXA_IMPOSTO;
+const totalEsperado = subtotalEsperado + taxEsperado;
+
+const precoTotal = {
+    tax: taxEsperado.toFixed(2),
+    total: totalEsperado.toFixed(2)
+};
+
 const validacoesCheckout = [
     {
         seletor: '.summary_subtotal_label',
        // textoEsperado: `Item total: ${precoTotal.item_total}`
        textoEsperado: `Item total: $${subtotalEsperado.toFixed(2)}`
-       },
+    },
     {
         seletor: '.summary_tax_label',
-        textoEsperado: `Tax: ${precoTotal.tax}`,
+        textoEsperado: `Tax: $${precoTotal.tax}`,
     },
     {
         seletor: '.summary_total_label',
-        textoEsperado: `Total: ${precoTotal.total}`
+        textoEsperado: `Total: $${precoTotal.total}`
     }
 ];
+
+const cenariosCheckoutNegativo = [
+    {
+        campo: 'First Name',
+        mensagemEsperada: 'Error: First Name is required'
+    },
+    {
+        campo: 'Last Name',
+        mensagemEsperada: 'Error: Last Name is required'
+    },
+    {
+        campo: 'Zip/Postal Code',
+        mensagemEsperada: 'Error: Postal Code is required'
+    }
+];
+
 
 for (const cenario of cenariosLogin) {
     test.beforeEach(async ({ page }) => {
@@ -80,7 +98,7 @@ for (const cenario of cenariosLogin) {
              .fill(dadosCheckout.nome);
 
             await page.getByRole('textbox', { name: 'Last Name' })
-                .fill(dadosCheckout.sobrenome);
+                .fill(dadosCheckout.sobreNome);
 
             await page.getByRole('textbox', { name: 'Zip/Postal Code' })
                 .fill(dadosCheckout.codigoPostal);
@@ -90,6 +108,12 @@ for (const cenario of cenariosLogin) {
             await expect(page).toHaveURL(
                 'https://www.saucedemo.com/checkout-step-two.html'
             );
+
+            await expect(
+                 page.getByText('Checkout: Overview', { exact: true })
+            ).toBeVisible();
+
+            await expect(page.locator('.cart_item')).toHaveCount(2);
 
             const itemCarrinho = page.locator('.cart_item')
                 .filter({ hasText: 'Sauce Labs Backpack' });
@@ -109,21 +133,6 @@ for (const cenario of cenariosLogin) {
 
             await expect(page.locator('.cart_item')).toHaveCount(2);
 
-            /*
-            // Capturar e comparar o subtotal
-            await expect(page.locator('.summary_subtotal_label'))
-            .toHaveText(`Item total: ${precototal.item_total}`);
-
-            // Capturar e comparar a taxa
-            await expect(page.locator('.summary_tax_label'))
-            .toHaveText(`Tax: ${precototal.tax}`);
-
-            // Capturar e comparar o total
-            await expect(page.locator('.summary_total_label'))
-            .toHaveText(`Total: ${precototal.total}`);
-
-            ou
-            */
             for(const validacao of validacoesCheckout){
                   await expect(page.locator(validacao.seletor))
                        .toHaveText(validacao.textoEsperado);
@@ -158,7 +167,11 @@ for (const cenario of cenariosLogin) {
         await page.getByRole('button', { name: 'Continue' }).click();
 
         await expect(page.locator('[data-test="error"]'))
-             .toHaveText('Error: First Name is required');
+             .toHaveText(cenariosCheckoutNegativo[0].mensagemEsperada);
+
+        await expect(page).toHaveURL(
+            'https://www.saucedemo.com/checkout-step-one.html'
+        );
 
         await page.screenshot({
               path: 'saucedemo-diagnostico0.png',
@@ -166,25 +179,35 @@ for (const cenario of cenariosLogin) {
               });
 
         await page.getByRole('textbox', { name: 'First Name' })
-              .fill('Antonio');
+              .fill(dadosCheckout.nome);
 
         await page.getByRole('button', { name: 'Continue' }).click();
 
+
+
         await expect(page.locator('[data-test="error"]'))
-             .toHaveText('Error: Last Name is required');
+             .toHaveText(cenariosCheckoutNegativo[1].mensagemEsperada);
+
+        await expect(page).toHaveURL(
+             'https://www.saucedemo.com/checkout-step-one.html'
+        );
 
         await page.screenshot({
               path: 'saucedemo-diagnostico1.png',
                     fullPage: true
-             });
+        });
 
         await page.getByRole('textbox', { name: 'Last Name' })
-             .fill('Martins');
+             .fill(dadosCheckout.sobreNome);
 
         await page.getByRole('button', { name: 'Continue' }).click();
 
         await expect(page.locator('[data-test="error"]'))
-                    .toHaveText('Error: Postal Code is required');
+             .toHaveText(cenariosCheckoutNegativo[2].mensagemEsperada);
+
+        await expect(page).toHaveURL(
+            'https://www.saucedemo.com/checkout-step-one.html'
+        );
 
         await page.screenshot({
              path: 'saucedemo-diagnostico2.png',
@@ -192,7 +215,7 @@ for (const cenario of cenariosLogin) {
              });
 
         await page.getByRole('textbox', { name: 'Zip/Postal Code' })
-             .fill('20010000');
+             .fill(dadosCheckout.codigoPostal);
 
         await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -204,6 +227,13 @@ for (const cenario of cenariosLogin) {
         await expect(page).toHaveURL(
              'https://www.saucedemo.com/checkout-step-two.html'
                 );
+
+
+        await expect(
+              page.getByText('Checkout: Overview', { exact: true })
+        ).toBeVisible();
+
+        await expect(page.locator('.cart_item')).toHaveCount(2);
 
         await page.screenshot({
              path: 'saucedemo-diagnostico4.png',

@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { expect } = require('@playwright/test');
 
 async function adicionarProdutosAoCarrinho(page, produtos){
 for (const [indice, item] of produtos.entries()) {

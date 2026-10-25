@@ -2,8 +2,6 @@ const { test, expect } = require('@playwright/test');
 const { realizarLogin } = require('../../helpers/login');
 const { adicionarProdutosAoCarrinho } = require('../../helpers/produtos');
 
-
-// 1. Dados dos cenários
 const cenariosLogin = [
     {
         descricao: '01 - Realizar Login com credenciais válidas',
@@ -48,18 +46,7 @@ for (const cenario of cenariosLogin) {
             const produtoRemover = produtos.find(
                 item => item.nome_produto === nomeProdutoParaRemover
             );
-            /*
-              const produtoRemover = produtos[1];
-              ou const nomeProduto = 'Sauce Labs Bike Light';
 
-
-            if (produtoRemover) {
-                console.log(produtoRemover.nome_produto);
-            } else {
-                console.log(`Produto "${nomeProdutoParaRemover}" pesquisado não encontrado para remoção.`);
-            }
-            */
-            // expect(produtoRemover).toBeDefined();
             expect(
                 produtoRemover,
                 `Produto "${nomeProdutoParaRemover}" não encontrado nos dados de teste.`

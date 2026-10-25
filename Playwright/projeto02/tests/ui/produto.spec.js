@@ -1,5 +1,6 @@
 const { test, expect } = require('@playwright/test');
 const { realizarLogin } = require('../../helpers/login');
+const { adicionarProdutosAoCarrinho } = require('../../helpers/produtos');
 
 
 // 1. Dados dos cenários
@@ -38,28 +39,8 @@ for (const cenario of cenariosLogin) {
     test('Adicionar Produto ao carrinho', async ({ page }) => {
         await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
         await expect(page.getByText('Products', { exact: true })).toBeVisible();
+        await adicionarProdutosAoCarrinho(page, produtos);
 
-        for (const [indice, item] of produtos.entries()) {
-            const produto = page.locator('.inventory_item')
-                .filter({ hasText: item.nome_produto });
-
-            await expect(produto).toHaveCount(1);
-
-            await expect(produto.locator('.inventory_item_name'))
-                .toHaveText(item.nome_produto);
-
-            const precoProduto = produto.locator('.inventory_item_price');
-
-            await expect(precoProduto).toHaveText(item.preco_produto);
-
-            const precoCapturado = await precoProduto.textContent();
-            console.log('Preço capturado:', precoCapturado);
-
-            await produto.getByRole('button', { name: 'Add to cart' }).click();
-
-            await expect(page.locator('.shopping_cart_badge'))
-                .toHaveText(String(indice + 1));
-           } // fecha o for dos produtos
     });
 
     test('Remover Produto do carrinho', async ({ page }) => {

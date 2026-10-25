@@ -28,13 +28,14 @@ const produtos = [
    }
 ];
 
+const nomeProdutoParaRemover = 'Sauce Labs Bike Light';
 
 for (const cenario of cenariosLogin) {
     test.beforeEach(async ({ page }) => {
         await realizarLogin(page, cenario.usuario, cenario.senha);
     });
 
-    test('02 - Adicionar Produtos ao carrinho', async ({ page }) => {
+    test('Adicionar Produto ao carrinho', async ({ page }) => {
         await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
         await expect(page.getByText('Products', { exact: true })).toBeVisible();
 
@@ -59,32 +60,56 @@ for (const cenario of cenariosLogin) {
             await expect(page.locator('.shopping_cart_badge'))
                 .toHaveText(String(indice + 1));
            } // fecha o for dos produtos
-    }); // fecha o
+    });
 
-    test('03 - Remover Produto do carrinho', async ({ page }) => {
+    test('Remover Produto do carrinho', async ({ page }) => {
 
-            const nomeProduto = 'Sauce Labs Backpack';
+            const produtoRemover = produtos.find(
+                item => item.nome_produto === nomeProdutoParaRemover
+            );
+            /*
+              const produtoRemover = produtos[1];
+              ou const nomeProduto = 'Sauce Labs Bike Light';
+
+
+            if (produtoRemover) {
+                console.log(produtoRemover.nome_produto);
+            } else {
+                console.log(`Produto "${nomeProdutoParaRemover}" pesquisado não encontrado para remoção.`);
+            }
+            */
+            // expect(produtoRemover).toBeDefined();
+            expect(
+                produtoRemover,
+                `Produto "${nomeProdutoParaRemover}" não encontrado nos dados de teste.`
+            ).toBeDefined();
+
+            const nomeProduto = produtoRemover.nome_produto;
 
             const produto = page.locator('.inventory_item')
              .filter({ hasText: nomeProduto });
 
-    // Adiciona o produto
+             // Adiciona o produto
             await produto.getByRole('button', { name: 'Add to cart' }).click();
 
-    // Abre o carrinho
+             // Abre o carrinho
             await page.locator('.shopping_cart_link').click();
 
-    // Confirma que o produto está no carrinho
+             // Confirma que o produto está no carrinho
              const itemCarrinho = page.locator('.cart_item')
              .filter({ hasText: nomeProduto });
 
              await expect(itemCarrinho).toHaveCount(1);
 
-    // Remove o produto
+             // Remove o produto
              await itemCarrinho.getByRole('button', { name: 'Remove' }).click();
 
-    // Confirma que o produto foi removido
-              await expect(itemCarrinho).toHaveCount(0);
+             // Confirma que o produto foi removido
+             await expect(itemCarrinho).toHaveCount(0);
+             // Confirma que no carrinho não existe mais nenhum produto
+             await expect(page.locator('.cart_item')).toHaveCount(0);
+             // Confirma que o contador não está visível
+             await expect(page.locator('.shopping_cart_badge')).toBeHidden();
 
 });
 }

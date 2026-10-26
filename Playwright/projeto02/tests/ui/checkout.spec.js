@@ -23,27 +23,29 @@ const produtos = [
    }
 ];
 
-const dadosCheckout = {
-    nome: 'Antonio',
-    sobreNome: 'Martins',
-    codigoPostal: '20010000'
-};
+const dadosCheckout =
+   {
+     nome: 'Antonio',
+     sobreNome: 'Martins',
+     codigoPostal: '20010000'
+   };
 
 const subtotalEsperado = produtos.reduce((acumulador, item) => {
     const preco = item.preco_produto.replace('$', '');
     const precoNumerico = Number(preco);
     const total = acumulador + precoNumerico;
     return total;
-}, 0);
+    }, 0);
 
 const TAXA_IMPOSTO = 0.08;
 const taxEsperado = subtotalEsperado * TAXA_IMPOSTO;
 const totalEsperado = subtotalEsperado + taxEsperado;
 
-const precoTotal = {
-    tax: taxEsperado.toFixed(2),
-    total: totalEsperado.toFixed(2)
-};
+const precoTotal =
+    {
+       tax: taxEsperado.toFixed(2),
+       total: totalEsperado.toFixed(2)
+    };
 
 const validacoesCheckout = [
     {
@@ -82,11 +84,10 @@ for (const cenario of cenariosLogin) {
         await realizarLogin(page, cenario.usuario, cenario.senha);
     });
 
-    test('Validar Resumo do Chekout com 02 Produtos no carrinho', async ({ page }) => {
+    test('CT-POS-01 - Validar Resumo do Chekout com 02 Produtos no carrinho', async ({ page }) => {
         await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
         await expect(page.getByText('Products', { exact: true })).toBeVisible();
         await adicionarProdutosAoCarrinho(page, produtos);
-
 
         console.log('Subtotal esperado:', subtotalEsperado);
 
@@ -97,41 +98,41 @@ for (const cenario of cenariosLogin) {
         await page.getByRole('textbox', { name: 'First Name' })
              .fill(dadosCheckout.nome);
 
-            await page.getByRole('textbox', { name: 'Last Name' })
+        await page.getByRole('textbox', { name: 'Last Name' })
                 .fill(dadosCheckout.sobreNome);
 
-            await page.getByRole('textbox', { name: 'Zip/Postal Code' })
+        await page.getByRole('textbox', { name: 'Zip/Postal Code' })
                 .fill(dadosCheckout.codigoPostal);
 
-            await page.getByRole('button', { name: 'Continue' }).click();
+        await page.getByRole('button', { name: 'Continue' }).click();
 
-            await expect(page).toHaveURL(
-                'https://www.saucedemo.com/checkout-step-two.html'
+        await expect(page).toHaveURL(
+            'https://www.saucedemo.com/checkout-step-two.html'
             );
 
-            await expect(
-                 page.getByText('Checkout: Overview', { exact: true })
+        await expect(
+            page.getByText('Checkout: Overview', { exact: true })
             ).toBeVisible();
 
-            await expect(page.locator('.cart_item')).toHaveCount(2);
+        await expect(page.locator('.cart_item')).toHaveCount(2);
 
-            const itemCarrinho = page.locator('.cart_item')
+        const itemCarrinho = page.locator('.cart_item')
                 .filter({ hasText: 'Sauce Labs Backpack' });
 
-            await expect(itemCarrinho)
+        await expect(itemCarrinho)
                  .toContainText('Sauce Labs Backpack');
 
-            const itemoutroCarrinho = page.locator('.cart_item')
+        const itemoutroCarrinho = page.locator('.cart_item')
                 .filter({ hasText: 'Sauce Labs Bolt T-Shirt' });
 
-            await expect(itemoutroCarrinho)
+        await expect(itemoutroCarrinho)
                  .toContainText('Sauce Labs Bolt T-Shirt');
 
-            await expect(
+        await expect(
                 page.getByText('Checkout: Overview', { exact: true })
             ).toBeVisible();
 
-            await expect(page.locator('.cart_item')).toHaveCount(2);
+        await expect(page.locator('.cart_item')).toHaveCount(2);
 
             for(const validacao of validacoesCheckout){
                   await expect(page.locator(validacao.seletor))
@@ -139,105 +140,125 @@ for (const cenario of cenariosLogin) {
                        console.log(`Validação aprovada: ${validacao.textoEsperado}`);
             }
 
-             await page.getByRole('button', { name: 'Finish' }).click();
+        await page.getByRole('button', { name: 'Finish' }).click();
 
-             await expect(page).toHaveURL(/checkout-complete\.html/);
+        await expect(page).toHaveURL(/checkout-complete\.html/);
 
-
-             await expect(
+        await expect(
                page.getByText('Thank you for your order!', { exact: true })
              ).toBeVisible();
 
-            await page.screenshot({
-                    path: 'saucedemo-diagnostico.png',
+        await page.screenshot({
+                    path: 'ct-pos-001-validar_resumo_chekout_02_produtos_carrinho.png',
                     fullPage: true
                     });
     });
 
-    test('Validar Chekout com dados invalidos', async ({ page }) => {
-        await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-        await expect(page.getByText('Products', { exact: true })).toBeVisible();
+    test('CT-NEG-01 - Validar Chekout com dados invalido para o campo First Name', async ({ page }) => {
+            await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+            await expect(page.getByText('Products', { exact: true })).toBeVisible();
 
-        await adicionarProdutosAoCarrinho(page, produtos);
+            await adicionarProdutosAoCarrinho(page, produtos);
 
-        await page.locator('.shopping_cart_link').click();
-        await expect(page.locator('.cart_item')).toHaveCount(2);
-        await page.getByRole('button', { name: 'Checkout' }).click();
+            await page.locator('.shopping_cart_link').click();
+            await expect(page.locator('.cart_item')).toHaveCount(2);
+            await page.getByRole('button', { name: 'Checkout' }).click();
 
-        await page.getByRole('button', { name: 'Continue' }).click();
+            await page.getByRole('button', { name: 'Continue' }).click();
 
-        await expect(page.locator('[data-test="error"]'))
+            await expect(page.locator('[data-test="error"]'))
              .toHaveText(cenariosCheckoutNegativo[0].mensagemEsperada);
 
-        await expect(page).toHaveURL(
-            'https://www.saucedemo.com/checkout-step-one.html'
-        );
+             await expect(page).toHaveURL(
+                'https://www.saucedemo.com/checkout-step-one.html'
+             );
 
-        await page.screenshot({
-              path: 'saucedemo-diagnostico0.png',
+             await page.screenshot({
+                 path: 'ct-neg-001-validar_checkout_para_campo_first_name.png',
                    fullPage: true
-              });
+                 });
 
-        await page.getByRole('textbox', { name: 'First Name' })
-              .fill(dadosCheckout.nome);
+             });
 
-        await page.getByRole('button', { name: 'Continue' }).click();
+        test('CT-NEG-02 - Validar Chekout com dados invalido para o campo Last Name', async ({ page }) => {
+            await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+            await expect(page.getByText('Products', { exact: true })).toBeVisible();
+
+            await adicionarProdutosAoCarrinho(page, produtos);
+
+            await page.locator('.shopping_cart_link').click();
+            await expect(page.locator('.cart_item')).toHaveCount(2);
+            await page.getByRole('button', { name: 'Checkout' }).click();
+
+            await page.getByRole('button', { name: 'Continue' }).click();
+
+            await expect(page.locator('[data-test="error"]'))
+                 .toHaveText(cenariosCheckoutNegativo[0].mensagemEsperada);
+
+            await expect(page).toHaveURL(
+                'https://www.saucedemo.com/checkout-step-one.html'
+            );
+
+            await page.getByRole('textbox', { name: 'First Name' })
+                  .fill(dadosCheckout.nome);
+
+            await page.getByRole('textbox', { name: 'Zip/Postal Code' })
+                  .fill(dadosCheckout.codigoPostal);
+
+            await page.getByRole('button', { name: 'Continue' }).click();
 
 
+            await expect(page.locator('[data-test="error"]'))
+                .toHaveText(cenariosCheckoutNegativo[1].mensagemEsperada);
 
-        await expect(page.locator('[data-test="error"]'))
-             .toHaveText(cenariosCheckoutNegativo[1].mensagemEsperada);
+            await expect(page).toHaveURL(
+                 'https://www.saucedemo.com/checkout-step-one.html'
+            );
 
-        await expect(page).toHaveURL(
-             'https://www.saucedemo.com/checkout-step-one.html'
-        );
-
-        await page.screenshot({
-              path: 'saucedemo-diagnostico1.png',
-                    fullPage: true
+            await page.screenshot({
+                  path: 'ct-neg-002-validar_checkout_para_campo_last_name.png',
+                        fullPage: true
+            });
         });
 
-        await page.getByRole('textbox', { name: 'Last Name' })
-             .fill(dadosCheckout.sobreNome);
+        test('CT-NEG-03 - Validar Chekout com dados invalido para o campo Zip Code', async ({ page }) => {
+            await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
+            await expect(page.getByText('Products', { exact: true })).toBeVisible();
 
-        await page.getByRole('button', { name: 'Continue' }).click();
+            await adicionarProdutosAoCarrinho(page, produtos);
 
-        await expect(page.locator('[data-test="error"]'))
-             .toHaveText(cenariosCheckoutNegativo[2].mensagemEsperada);
+            await page.locator('.shopping_cart_link').click();
+            await expect(page.locator('.cart_item')).toHaveCount(2);
+            await page.getByRole('button', { name: 'Checkout' }).click();
 
-        await expect(page).toHaveURL(
-            'https://www.saucedemo.com/checkout-step-one.html'
-        );
+            await page.getByRole('button', { name: 'Continue' }).click();
 
-        await page.screenshot({
-             path: 'saucedemo-diagnostico2.png',
-                   fullPage: true
-             });
+            await expect(page.locator('[data-test="error"]'))
+                     .toHaveText(cenariosCheckoutNegativo[0].mensagemEsperada);
 
-        await page.getByRole('textbox', { name: 'Zip/Postal Code' })
-             .fill(dadosCheckout.codigoPostal);
-
-        await page.getByRole('button', { name: 'Continue' }).click();
-
-        await page.screenshot({
-              path: 'saucedemo-diagnostico3.png',
-                          fullPage: true
-                    });
-
-        await expect(page).toHaveURL(
-             'https://www.saucedemo.com/checkout-step-two.html'
+            await expect(page).toHaveURL(
+                    'https://www.saucedemo.com/checkout-step-one.html'
                 );
 
+            await page.getByRole('textbox', { name: 'First Name' })
+                      .fill(dadosCheckout.nome);
 
-        await expect(
-              page.getByText('Checkout: Overview', { exact: true })
-        ).toBeVisible();
+            await page.getByRole('textbox', { name: 'Last Name' })
+                     .fill(dadosCheckout.sobreNome);
 
-        await expect(page.locator('.cart_item')).toHaveCount(2);
+            await page.getByRole('button', { name: 'Continue' }).click();
 
-        await page.screenshot({
-             path: 'saucedemo-diagnostico4.png',
-                   fullPage: true
-             });
-    });
+            await expect(page.locator('[data-test="error"]'))
+                        .toHaveText(cenariosCheckoutNegativo[2].mensagemEsperada);
+
+            await expect(page).toHaveURL(
+                    'https://www.saucedemo.com/checkout-step-one.html'
+                );
+
+            await page.screenshot({
+                     path: 'ct-neg-003-validar_checkout_para_campo_ip_code.png',
+                           fullPage: true
+                     });
+
+            });
 }

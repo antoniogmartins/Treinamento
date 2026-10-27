@@ -2,6 +2,7 @@ const { test, expect } = require('@playwright/test');
 const { realizarLogin } = require('../../helpers/login');
 const { adicionarProdutosAoCarrinho } = require('../../helpers/produtos');
 const { iniciarCheckout } = require('../../helpers/iniciarCheckout');
+const { CheckoutPage } = require('../../pages/CheckoutPage');
 
 const produtos = [
    {
@@ -89,16 +90,12 @@ const quantidadeEsperada = produtos.length;
 
         console.log('Subtotal esperado:', subtotalEsperado);
 
-        await page.getByRole('textbox', { name: 'First Name' })
-             .fill(dadosCheckout.nome);
+        const checkoutPage = new CheckoutPage(page);
+        await checkoutPage.preencherNome(dadosCheckout.nome);
+        await checkoutPage.preencherSobrenome(dadosCheckout.sobreNome);
+        await checkoutPage.preencherCodigoPostal(dadosCheckout.codigoPostal);
 
-        await page.getByRole('textbox', { name: 'Last Name' })
-                .fill(dadosCheckout.sobreNome);
-
-        await page.getByRole('textbox', { name: 'Zip/Postal Code' })
-                .fill(dadosCheckout.codigoPostal);
-
-        await page.getByRole('button', { name: 'Continue' }).click();
+        await checkoutPage.clicarContinuar();
 
         await expect(page).toHaveURL(
             'https://www.saucedemo.com/checkout-step-two.html'
@@ -146,10 +143,10 @@ const quantidadeEsperada = produtos.length;
 
             await iniciarCheckout(page, quantidadeEsperada);
 
-            await page.getByRole('button', { name: 'Continue' }).click();
+            const checkoutPage = new CheckoutPage(page);
+            await checkoutPage.clicarContinuar();
 
-            await expect(page.locator('[data-test="error"]'))
-             .toHaveText(cenariosCheckoutNegativo[0].mensagemEsperada);
+            await checkoutPage.validarMensagemErro(cenariosCheckoutNegativo[0].mensagemEsperada);
 
              await expect(page).toHaveURL(
                 'https://www.saucedemo.com/checkout-step-one.html'
@@ -170,26 +167,21 @@ const quantidadeEsperada = produtos.length;
 
             await iniciarCheckout(page, quantidadeEsperada);
 
-            await page.getByRole('button', { name: 'Continue' }).click();
+            const checkoutPage = new CheckoutPage(page);
+            await checkoutPage.clicarContinuar();
 
-            await expect(page.locator('[data-test="error"]'))
-                 .toHaveText(cenariosCheckoutNegativo[0].mensagemEsperada);
+            await checkoutPage.validarMensagemErro(cenariosCheckoutNegativo[0].mensagemEsperada);
 
             await expect(page).toHaveURL(
                 'https://www.saucedemo.com/checkout-step-one.html'
             );
 
-            await page.getByRole('textbox', { name: 'First Name' })
-                  .fill(dadosCheckout.nome);
+            await checkoutPage.preencherNome(dadosCheckout.nome);
+            await checkoutPage.preencherCodigoPostal(dadosCheckout.codigoPostal);
 
-            await page.getByRole('textbox', { name: 'Zip/Postal Code' })
-                  .fill(dadosCheckout.codigoPostal);
+            await checkoutPage.clicarContinuar();
 
-            await page.getByRole('button', { name: 'Continue' }).click();
-
-
-            await expect(page.locator('[data-test="error"]'))
-                .toHaveText(cenariosCheckoutNegativo[1].mensagemEsperada);
+            await checkoutPage.validarMensagemErro(cenariosCheckoutNegativo[1].mensagemEsperada);
 
             await expect(page).toHaveURL(
                  'https://www.saucedemo.com/checkout-step-one.html'
@@ -209,25 +201,21 @@ const quantidadeEsperada = produtos.length;
 
             await iniciarCheckout(page, quantidadeEsperada);
 
-            await page.getByRole('button', { name: 'Continue' }).click();
+            const checkoutPage = new CheckoutPage(page);
+            await checkoutPage.clicarContinuar();
 
-            await expect(page.locator('[data-test="error"]'))
-                     .toHaveText(cenariosCheckoutNegativo[0].mensagemEsperada);
+          await checkoutPage.validarMensagemErro(cenariosCheckoutNegativo[0].mensagemEsperada);
 
             await expect(page).toHaveURL(
                     'https://www.saucedemo.com/checkout-step-one.html'
                 );
 
-            await page.getByRole('textbox', { name: 'First Name' })
-                      .fill(dadosCheckout.nome);
+            await checkoutPage.preencherNome(dadosCheckout.nome);
+            await checkoutPage.preencherSobrenome(dadosCheckout.sobreNome);
 
-            await page.getByRole('textbox', { name: 'Last Name' })
-                     .fill(dadosCheckout.sobreNome);
+            await checkoutPage.clicarContinuar();
 
-            await page.getByRole('button', { name: 'Continue' }).click();
-
-            await expect(page.locator('[data-test="error"]'))
-                        .toHaveText(cenariosCheckoutNegativo[2].mensagemEsperada);
+            await checkoutPage.validarMensagemErro(cenariosCheckoutNegativo[2].mensagemEsperada);
 
             await expect(page).toHaveURL(
                     'https://www.saucedemo.com/checkout-step-one.html'

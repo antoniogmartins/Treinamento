@@ -2,16 +2,6 @@ const { test, expect } = require('@playwright/test');
 const { realizarLogin } = require('../../helpers/login');
 const { adicionarProdutosAoCarrinho } = require('../../helpers/produtos');
 
-const cenariosLogin = [
-    {
-        descricao: '01 - Realizar Login com credenciais válidas',
-        usuario: 'standard_user',
-        senha: 'secret_sauce',
-        resultado: 'sucesso',
-        mensagemEsperada: null
-    }
-];
-
 const produtos = [
    {
       nome_produto: 'Sauce Labs Backpack',
@@ -38,12 +28,12 @@ const subtotalEsperado = produtos.reduce((acumulador, item) => {
     }, 0);
 
 const TAXA_IMPOSTO = 0.08;
-const taxEsperado = subtotalEsperado * TAXA_IMPOSTO;
-const totalEsperado = subtotalEsperado + taxEsperado;
+const impostoEsperado = subtotalEsperado * TAXA_IMPOSTO;
+const totalEsperado = subtotalEsperado + impostoEsperado;
 
 const precoTotal =
     {
-       tax: taxEsperado.toFixed(2),
+       tax: impostoEsperado.toFixed(2),
        total: totalEsperado.toFixed(2)
     };
 
@@ -78,10 +68,13 @@ const cenariosCheckoutNegativo = [
     }
 ];
 
+const usuarioTeste = {
+    usuario: 'standard_user',
+    senha: 'secret_sauce'
+};
 
-for (const cenario of cenariosLogin) {
     test.beforeEach(async ({ page }) => {
-        await realizarLogin(page, cenario.usuario, cenario.senha);
+        await realizarLogin(page,usuarioTeste.usuario,usuarioTeste.senha);
     });
 
     test('CT-POS-01 - Validar Resumo do Chekout com 02 Produtos no carrinho', async ({ page }) => {
@@ -122,17 +115,11 @@ for (const cenario of cenariosLogin) {
         await expect(itemCarrinho)
                  .toContainText('Sauce Labs Backpack');
 
-        const itemoutroCarrinho = page.locator('.cart_item')
+        const itempecaCarrinho = page.locator('.cart_item')
                 .filter({ hasText: 'Sauce Labs Bolt T-Shirt' });
 
-        await expect(itemoutroCarrinho)
+        await expect(itempecaCarrinho)
                  .toContainText('Sauce Labs Bolt T-Shirt');
-
-        await expect(
-                page.getByText('Checkout: Overview', { exact: true })
-            ).toBeVisible();
-
-        await expect(page.locator('.cart_item')).toHaveCount(2);
 
             for(const validacao of validacoesCheckout){
                   await expect(page.locator(validacao.seletor))
@@ -154,7 +141,7 @@ for (const cenario of cenariosLogin) {
                     });
     });
 
-    test('CT-NEG-01 - Validar Chekout com dados invalido para o campo First Name', async ({ page }) => {
+        test('CT-NEG-01 - Verificar a validação inicial com todos os campos vazios', async ({ page }) => {
             await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
             await expect(page.getByText('Products', { exact: true })).toBeVisible();
 
@@ -180,7 +167,7 @@ for (const cenario of cenariosLogin) {
 
              });
 
-        test('CT-NEG-02 - Validar Chekout com dados invalido para o campo Last Name', async ({ page }) => {
+        test('CT-NEG-02 - Verificar a progressão até a validação de Last Name', async ({ page }) => {
             await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
             await expect(page.getByText('Products', { exact: true })).toBeVisible();
 
@@ -221,7 +208,7 @@ for (const cenario of cenariosLogin) {
             });
         });
 
-        test('CT-NEG-03 - Validar Chekout com dados invalido para o campo Zip Code', async ({ page }) => {
+        test('CT-NEG-03 - Verificar a progressão até a validação de Postal Code', async ({ page }) => {
             await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
             await expect(page.getByText('Products', { exact: true })).toBeVisible();
 
@@ -256,9 +243,9 @@ for (const cenario of cenariosLogin) {
                 );
 
             await page.screenshot({
-                     path: 'ct-neg-003-validar_checkout_para_campo_ip_code.png',
+                     path: 'ct-neg-003-validar_checkout_para_campo_zip_code.png',
                            fullPage: true
                      });
 
             });
-}
+

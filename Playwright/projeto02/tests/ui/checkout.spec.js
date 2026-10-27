@@ -1,8 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { realizarLogin } = require('../../helpers/login');
-const { adicionarProdutosAoCarrinho } = require('../../helpers/produtos');
-const { iniciarCheckout } = require('../../helpers/iniciarCheckout');
 const { CheckoutPage } = require('../../pages/CheckoutPage');
+const { prepararCheckoutPage } = require('../../helpers/prepararCheckout');
 
 const produtos = [
    {
@@ -82,11 +81,8 @@ const quantidadeEsperada = produtos.length;
     });
 
     test('CT-POS-01 - Validar Resumo do Chekout com 02 Produtos no carrinho', async ({ page }) => {
-        await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-        await expect(page.getByText('Products', { exact: true })).toBeVisible();
-        await adicionarProdutosAoCarrinho(page, produtos);
 
-        await iniciarCheckout(page, quantidadeEsperada);
+        await prepararCheckoutPage(page,produtos, quantidadeEsperada);
 
         console.log('Subtotal esperado:', subtotalEsperado);
 
@@ -136,12 +132,7 @@ const quantidadeEsperada = produtos.length;
     });
 
         test('CT-NEG-01 - Verificar a validação inicial com todos os campos vazios', async ({ page }) => {
-            await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-            await expect(page.getByText('Products', { exact: true })).toBeVisible();
-
-            await adicionarProdutosAoCarrinho(page, produtos);
-
-            await iniciarCheckout(page, quantidadeEsperada);
+            await prepararCheckoutPage(page,produtos, quantidadeEsperada);
 
             const checkoutPage = new CheckoutPage(page);
             await checkoutPage.clicarContinuar();
@@ -160,12 +151,7 @@ const quantidadeEsperada = produtos.length;
              });
 
         test('CT-NEG-02 - Verificar a progressão até a validação de Last Name', async ({ page }) => {
-            await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-            await expect(page.getByText('Products', { exact: true })).toBeVisible();
-
-            await adicionarProdutosAoCarrinho(page, produtos);
-
-            await iniciarCheckout(page, quantidadeEsperada);
+            await prepararCheckoutPage(page,produtos, quantidadeEsperada);
 
             const checkoutPage = new CheckoutPage(page);
             await checkoutPage.clicarContinuar();
@@ -194,17 +180,12 @@ const quantidadeEsperada = produtos.length;
         });
 
         test('CT-NEG-03 - Verificar a progressão até a validação de Postal Code', async ({ page }) => {
-            await expect(page).toHaveURL('https://www.saucedemo.com/inventory.html');
-            await expect(page.getByText('Products', { exact: true })).toBeVisible();
-
-            await adicionarProdutosAoCarrinho(page, produtos);
-
-            await iniciarCheckout(page, quantidadeEsperada);
+            await prepararCheckoutPage(page,produtos, quantidadeEsperada);
 
             const checkoutPage = new CheckoutPage(page);
             await checkoutPage.clicarContinuar();
 
-          await checkoutPage.validarMensagemErro(cenariosCheckoutNegativo[0].mensagemEsperada);
+            await checkoutPage.validarMensagemErro(cenariosCheckoutNegativo[0].mensagemEsperada);
 
             await expect(page).toHaveURL(
                     'https://www.saucedemo.com/checkout-step-one.html'

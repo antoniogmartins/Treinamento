@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 const { realizarLogin } = require('../../helpers/login');
 const { adicionarProdutosAoCarrinho } = require('../../helpers/produtos');
+const { iniciarCheckout } = require('../../helpers/iniciarCheckout');
 
 const produtos = [
    {
@@ -39,8 +40,7 @@ const precoTotal =
 
 const validacoesCheckout = [
     {
-        seletor: '.summary_subtotal_label',
-       // textoEsperado: `Item total: ${precoTotal.item_total}`
+       seletor: '.summary_subtotal_label',
        textoEsperado: `Item total: $${subtotalEsperado.toFixed(2)}`
     },
     {
@@ -73,6 +73,9 @@ const usuarioTeste = {
     senha: 'secret_sauce'
 };
 
+
+const quantidadeEsperada = produtos.length;
+
     test.beforeEach(async ({ page }) => {
         await realizarLogin(page,usuarioTeste.usuario,usuarioTeste.senha);
     });
@@ -82,11 +85,9 @@ const usuarioTeste = {
         await expect(page.getByText('Products', { exact: true })).toBeVisible();
         await adicionarProdutosAoCarrinho(page, produtos);
 
-        console.log('Subtotal esperado:', subtotalEsperado);
+        await iniciarCheckout(page, quantidadeEsperada);
 
-        await page.locator('.shopping_cart_link').click();
-        await expect(page.locator('.cart_item')).toHaveCount(2);
-        await page.getByRole('button', { name: 'Checkout' }).click();
+        console.log('Subtotal esperado:', subtotalEsperado);
 
         await page.getByRole('textbox', { name: 'First Name' })
              .fill(dadosCheckout.nome);
@@ -107,20 +108,16 @@ const usuarioTeste = {
             page.getByText('Checkout: Overview', { exact: true })
             ).toBeVisible();
 
-        await expect(page.locator('.cart_item')).toHaveCount(2);
+        await expect(page.locator('.cart_item')).toHaveCount(quantidadeEsperada);
 
+        for (const itemproduto of produtos){
         const itemCarrinho = page.locator('.cart_item')
-                .filter({ hasText: 'Sauce Labs Backpack' });
+                .filter({ hasText: itemproduto.nome_produto });
 
         await expect(itemCarrinho)
-                 .toContainText('Sauce Labs Backpack');
+                 .toContainText(itemproduto.nome_produto);
 
-        const itempecaCarrinho = page.locator('.cart_item')
-                .filter({ hasText: 'Sauce Labs Bolt T-Shirt' });
-
-        await expect(itempecaCarrinho)
-                 .toContainText('Sauce Labs Bolt T-Shirt');
-
+        }
             for(const validacao of validacoesCheckout){
                   await expect(page.locator(validacao.seletor))
                        .toHaveText(validacao.textoEsperado);
@@ -147,9 +144,7 @@ const usuarioTeste = {
 
             await adicionarProdutosAoCarrinho(page, produtos);
 
-            await page.locator('.shopping_cart_link').click();
-            await expect(page.locator('.cart_item')).toHaveCount(2);
-            await page.getByRole('button', { name: 'Checkout' }).click();
+            await iniciarCheckout(page, quantidadeEsperada);
 
             await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -173,9 +168,7 @@ const usuarioTeste = {
 
             await adicionarProdutosAoCarrinho(page, produtos);
 
-            await page.locator('.shopping_cart_link').click();
-            await expect(page.locator('.cart_item')).toHaveCount(2);
-            await page.getByRole('button', { name: 'Checkout' }).click();
+            await iniciarCheckout(page, quantidadeEsperada);
 
             await page.getByRole('button', { name: 'Continue' }).click();
 
@@ -214,9 +207,7 @@ const usuarioTeste = {
 
             await adicionarProdutosAoCarrinho(page, produtos);
 
-            await page.locator('.shopping_cart_link').click();
-            await expect(page.locator('.cart_item')).toHaveCount(2);
-            await page.getByRole('button', { name: 'Checkout' }).click();
+            await iniciarCheckout(page, quantidadeEsperada);
 
             await page.getByRole('button', { name: 'Continue' }).click();
 

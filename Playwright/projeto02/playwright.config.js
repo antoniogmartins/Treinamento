@@ -34,6 +34,8 @@ export default defineConfig({
     trace: 'on-first-retry',
     headless: true
   },
+  baseURL: 'https://jsonplaceholder.typicode.com',
+
 
   /* Configure projects for major browsers */
   projects: [

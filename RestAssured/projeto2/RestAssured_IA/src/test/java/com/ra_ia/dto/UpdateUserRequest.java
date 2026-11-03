@@ -2,7 +2,7 @@ package com.ra_ia.dto;
 
 import com.ra_ia.api.UserDTO;
 
-public class updateUserRequest extends UserDTO
+public class UpdateUserRequest extends UserDTO
 {
     UserDTO atualizarUsuario = new UserDTO(
             "Antonio Martins",

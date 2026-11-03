@@ -1,6 +1,6 @@
 package com.ra_ia.api;
-import com.ra_ia.dto.createUserRequest;
-import com.ra_ia.dto.updateUserRequest;
+import com.ra_ia.dto.CreateUserRequest;
+import com.ra_ia.dto.UpdateUserRequest;
 import com.ra_ia.prediario.UsuarioNaoEncontradoException;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -14,7 +14,7 @@ public class PrimeiroTesteApi {
 
     String baseUrl = "https://jsonplaceholder.typicode.com/";
 
-   //  @Test
+    //  @Test
     void deveConsultarUsuarios() {
         Response resposta = RestAssured
                 .given()
@@ -39,7 +39,7 @@ public class PrimeiroTesteApi {
 
     }
 
-   // @Test
+    // @Test
     void deveEncontrarUsuarioPorEmail() {
 
         Response resposta = RestAssured
@@ -74,10 +74,10 @@ public class PrimeiroTesteApi {
         assertEquals(usernameEsperado, usuarioEncontrado.getUsername());
     }
 
-   // @Test
+    // @Test
     void deveCriarUsuario() {
 
-        createUserRequest novoUsuario = new createUserRequest();
+        CreateUserRequest novoUsuario = new CreateUserRequest();
 
         Response resposta = RestAssured
                 .given()
@@ -100,10 +100,10 @@ public class PrimeiroTesteApi {
         assertEquals(novoUsuario.getEmail(), usuarioCriado.getEmail());
     }
 
-    @Test
+    //@Test
     void deveAtualizarUsuario() {
 
-        updateUserRequest atualizarUsuario = new  updateUserRequest();
+        UpdateUserRequest atualizarUsuario = new UpdateUserRequest();
 
         Response resposta = RestAssured
                 .given()
@@ -124,4 +124,65 @@ public class PrimeiroTesteApi {
         assertEquals(atualizarUsuario.getUsername(), usuarioAtualizado.getUsername());
         assertEquals(atualizarUsuario.getEmail(), usuarioAtualizado.getEmail());
     }
-}
+
+
+    //@Test
+    void deveDeletarUsuario() {
+
+        Response resposta = RestAssured
+                .given()
+                .header("Accept", "application/json")
+                .when()
+                .delete(baseUrl + "users/1")
+                .then()
+                .statusCode(200)
+                .extract()
+                .response();
+
+
+    }
+
+    @Test
+    void deveSerIdempotenteAoAtualizarUsuario() {
+
+        UpdateUserRequest atualizarUsuario = new UpdateUserRequest();
+
+        Response resposta1 = RestAssured
+                .given()
+                .header("Accept", "application/json")
+                .contentType(ContentType.JSON)
+                .body(atualizarUsuario)
+                .when()
+                .put(baseUrl + "users/10")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .response();
+
+        UserDTO usuarioAtualizado1 = resposta1.as(UserDTO.class);
+
+        Response resposta2 = RestAssured
+                .given()
+                .header("Accept", "application/json")
+                .contentType(ContentType.JSON)
+                .body(atualizarUsuario)
+                .when()
+                .put(baseUrl + "users/10")
+                .then()
+                .statusCode(200)
+                .contentType(ContentType.JSON)
+                .extract()
+                .response();
+
+        UserDTO usuarioAtualizado2 = resposta2.as(UserDTO.class);
+
+        assertEquals(usuarioAtualizado1.getName(), usuarioAtualizado2.getName());
+        assertEquals(usuarioAtualizado1.getUsername(), usuarioAtualizado2.getUsername());
+        assertEquals(usuarioAtualizado1.getEmail(), usuarioAtualizado2.getEmail());
+
+    }
+
+    void deveSerIdempotenteAoDeletarUsuario() {
+    }
+};
